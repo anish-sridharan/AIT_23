@@ -19,23 +19,22 @@ class Bayes:
     #Q3
     def norm_constant(self,observation):
         norm_cst = 0
-        for item in self.hypothesis_list_:
-            prior = self.prior_list_[self.hypothesis_list_.index(item)]
+        for index,item in enumerate(self.hypothesis_list_):
+            prior = self.prior_list_[index]
             norm_cst = norm_cst + prior*self.likelihood(observation,item)
         return norm_cst    
 
     #Q4
     def single_posterior_update(self,observation,priors_list):
         posterior_list = []
-        count=0
-        for prior in priors_list:
-
+        
+        for count,prior in enumerate(priors_list):
             likelihood = self.likelihood(observation,self.hypothesis_list_[count])
             const = self.norm_constant(observation)
             posterior = (prior*likelihood)/const
             posterior = round(posterior,3)
             posterior_list.append(posterior)
-            count+=1
+        
         return posterior_list    
     
     
