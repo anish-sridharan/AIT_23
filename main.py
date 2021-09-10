@@ -1,7 +1,7 @@
 from Bayes import Bayes
 import numpy as np
 if __name__ == "__main__" :
-    file1 = open("answers.txt","w")
+    file1 = open("Group_23.txt","w")
     #Problem 1
     print("Answer to Problem1")
     hypos = ["Bowl1", "Bowl2"]
