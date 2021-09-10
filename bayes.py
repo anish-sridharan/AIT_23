@@ -13,14 +13,14 @@ class Bayes:
     def likelihood(self, observation, hypothesis):
         return self.likelihoods[hypothesis][observation]
 
-    def norm_constant(self, observation):
+    def norm_constant(self, observation, priors):
         res = 0
         for h in self.hypothesis:
-            res += (self.priors[h] * self.likelihood(observation, h))
+            res += (priors[h] * self.likelihood(observation, h))
         return res
 
     def single_posterior_update(self, observation, priors):
-        c = self.norm_constant(observation)
+        c = self.norm_constant(observation, priors)
         res = {}
         for hypothesis, prior in priors.items():
             res[hypothesis] = prior * self.likelihood(observation, hypothesis) / c
