@@ -8,7 +8,7 @@ We make use of `pip` package to install the necessary library `numpy`. Please ru
 sudo apt install python3-pip
 pip3 install numpy
 ```
-### NOTE:  We assume that the user is using Linux and we python3 for executing the code.
+### NOTE:  We assume that the user is using Linux and we use python3 for executing the code.
 
 ## Steps to generate text file
 
@@ -22,7 +22,7 @@ pip3 install numpy
    ```
    python3 main.py
    ```
-4. A text file with the name `Group_23.txt` would be generated and can be seen inside the AIT_23 directory.
+4. A text file with the name `group_23.txt` would be generated and can be seen inside the AIT_23 directory.
 
 It has the following content:
 ```
