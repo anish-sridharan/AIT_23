@@ -53,7 +53,6 @@ class Bayes:
                 observation, self.hypothesis_list_[count])
             const = self.norm_constant(observation)
             posterior = (prior*likelihood)/const
-            posterior = round(posterior, 3)
             posterior_list.append(posterior)
 
         return posterior_list
@@ -62,7 +61,7 @@ class Bayes:
         function compute_posterior takes
                 - list of observation
 
-        Calculates P(H | O_1, O_2, ..., O_n) = P(O_1 | H) * P(O_2 | H) * P(H) / P(O_1, O_2)
+        Calculates P(H | O_1, O_2, ..., O_n)
     """
 
     def compute_posterior(self, observations_list):
@@ -108,10 +107,11 @@ if __name__ == "__main__":
     a_obs = ["yellow", "white", "blue", "red", "red", "blue"]
     q3 = archer_b.compute_posterior(a_obs)
 
-    print("yellow, white, blue, red, red, blue =  ", q3)
+    print("Posterior on seeing yellow, white, blue, red, red, blue =  ", q3)
 
     index_max = q3.index(max(q3))
     most_prob_level = a_hypos[index_max]
+    print("Most probable level: %s" % most_prob_level)
     ## Code for printing to file
     result = "{:.3f}\n{:.3f}\n{:.3f}\n{}".format(q1[c_hypos.index("Bowl1")], q2[c_hypos.index("Bowl2")],
                                                  q3[a_hypos.index("Intermediate")], most_prob_level)
