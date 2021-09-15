@@ -8,7 +8,7 @@ class Bayes:
         self.observations_list_ = observations_list
 
     """
-        function likelihood takes:
+        function likelihood takes:d
             - observation
             - hypothesis
 
@@ -66,6 +66,7 @@ class Bayes:
     """
 
     def compute_posterior(self, observations_list):
+        posterior = 0
         for observation in observations_list:
             posterior = self.single_posterior_update(
                 observation, self.prior_list_)
@@ -77,36 +78,46 @@ class Bayes:
 if __name__ == "__main__":
 
     #Problem 1
-    print("Answer to Problem1")
-    hypos = ["Bowl1", "Bowl2"]
-    priors = [0.5, 0.5]
-    obs_list = ["chocolate", "vanilla"]
-    likelihood = [[15/50, 35/50], [30/50, 20/50]]
-    b = Bayes(hypos, priors, obs_list, likelihood)
+    print("Problem 1")
+    c_hypos = ["Bowl1", "Bowl2"]
+    c_priors = [0.5, 0.5]
+    c_obs_list = ["chocolate", "vanilla"]
+    c_likelihood = [[15/50, 35/50], [30/50, 20/50]]
+    cookie_b = Bayes(c_hypos, c_priors, c_obs_list, c_likelihood)
 
-    l = b.likelihood("chocolate", "Bowl1")
-    round(l, 3)
+    l = cookie_b.likelihood("chocolate", "Bowl1")
     print("likelihood(chococolate, Bowl1) =  ", l)
 
-    l = b.single_posterior_update("vanilla", [0.5, 0.5])
+    q1 = cookie_b.single_posterior_update("vanilla", [0.5, 0.5])
 
-    print("single_posterior_updatedate(vanilla, [0.5, 0.5]) =  ", l)
+    print("single_posterior_updatedate(vanilla, [0.5, 0.5]) =  ", q1)
 
-    l = b.compute_posterior(["chocolate", "vanilla"])
+    q2 = cookie_b.compute_posterior(["chocolate", "vanilla"])
 
-    print("chocolate, vannila =  ", l)
+    print("chocolate, vanilla =  ", q2)
 
     #Problem2
-    print("Answer to Problem 2")
-    hypos = ["Beginner", "Intermediate", "Advanced", "Expert"]
-    priors = [0.25, 0.25, 0.25, 0.25]
-    obs_list = ["yellow", "red", "blue", "black", "white"]
-    obs = ["yellow", "white", "blue", "red", "red", "blue"]
-    likelihood = [[0.05, 0.1, 0.4, 0.25, 0.2], [0.1, 0.2, 0.4, 0.2, 0.1], [
+    print("Problem 2")
+    a_hypos = ["Beginner", "Intermediate", "Advanced", "Expert"]
+    a_priors = [0.25, 0.25, 0.25, 0.25]
+    a_obs_list = ["yellow", "red", "blue", "black", "white"]
+    a_likelihood = [[0.05, 0.1, 0.4, 0.25, 0.2], [0.1, 0.2, 0.4, 0.2, 0.1], [
         0.2, 0.4, 0.25, 0.1, 0.05], [0.3, 0.5, 0.125, 0.05, 0.025]]
-    b = Bayes(hypos, priors, obs_list, likelihood)
+    archer_b = Bayes(a_hypos, a_priors, a_obs_list, a_likelihood)
 
-    l = b.compute_posterior(obs)
+    a_obs = ["yellow", "white", "blue", "red", "red", "blue"]
+    q3 = archer_b.compute_posterior(a_obs)
 
-    print("yellow, white, blue, red, red, blue =  ", l)
+    print("yellow, white, blue, red, red, blue =  ", q3)
+
+    index_max = q3.index(max(q3))
+    most_prob_level = a_hypos[index_max]
+    ## Code for printing to file
+    result = "{:.3f}\n{:.3f}\n{:.3f}\n{}".format(q1[c_hypos.index("Bowl1")], q2[c_hypos.index("Bowl2")],
+                                                 q3[a_hypos.index("Intermediate")], most_prob_level)
+    f = open("group_23.txt", "w")
+    f.write(result)
+    f.close()
+
+
 
