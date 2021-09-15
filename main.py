@@ -87,13 +87,16 @@ if __name__ == "__main__":
     l = cookie_b.likelihood("chocolate", "Bowl1")
     print("likelihood(chococolate, Bowl1) =  ", l)
 
-    q1 = cookie_b.single_posterior_update("vanilla", [0.5, 0.5])
+    q1 = cookie_b.single_posterior_update("vanilla", [0.5, 0.5]) # Probabilities of having picked bowl 1 and bowl 2 given we observe a vanilla cookie.
 
-    print("single_posterior_updatedate(vanilla, [0.5, 0.5]) =  ", q1)
+    #print("single_posterior_update(vanilla, [0.5, 0.5]) =  ", q1)
+    print("Probability of having picked bowl 1 after seeing a vanilla cookie is ", q1[c_hypos.index("Bowl1")])
 
-    q2 = cookie_b.compute_posterior(["chocolate", "vanilla"])
+    q2 = cookie_b.compute_posterior(["chocolate", "vanilla"]) # Probabilities of having picked bowl 1 and bowl 2 given we observe a cholcolate and a vanilla cookie.
 
-    print("chocolate, vanilla =  ", q2)
+    #print("chocolate, vanilla =  ", q2)
+    print("Probability of having picked bowl 2 after seeing  a chocolate and a vanilla cookie is ", q2[c_hypos.index("Bowl2")])
+
 
     #Problem2
     print("Problem 2")
@@ -107,11 +110,11 @@ if __name__ == "__main__":
     a_obs = ["yellow", "white", "blue", "red", "red", "blue"]
     q3 = archer_b.compute_posterior(a_obs)
 
-    print("Posterior on seeing yellow, white, blue, red, red, blue =  ", q3)
+    print("Probability that the archer is intermediate given we see yellow, white, blue, red, red, blue =  ", q3)
 
     index_max = q3.index(max(q3))
     most_prob_level = a_hypos[index_max]
-    print("Most probable level: %s" % most_prob_level)
+    print("Most probable level of the archer is: %s" % most_prob_level)
     ## Code for printing to file
     result = "{:.3f}\n{:.3f}\n{:.3f}\n{}".format(q1[c_hypos.index("Bowl1")], q2[c_hypos.index("Bowl2")],
                                                  q3[a_hypos.index("Intermediate")], most_prob_level)
