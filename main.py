@@ -110,7 +110,7 @@ if __name__ == "__main__":
     a_obs = ["yellow", "white", "blue", "red", "red", "blue"]
     q3 = archer_b.compute_posterior(a_obs)
 
-    print("Probability that the archer is intermediate given we see yellow, white, blue, red, red, blue =  ", q3)
+    print("Probability that the archer is intermediate given we see yellow, white, blue, red, red, blue =  ", q3[a_hypos.index("Intermediate")])
 
     index_max = q3.index(max(q3))
     most_prob_level = a_hypos[index_max]
