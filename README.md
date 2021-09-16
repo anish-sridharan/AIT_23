@@ -2,11 +2,10 @@
 
 ## Prerequisites
 
-We make use of `pip` package to install the necessary library `numpy`. Please run the following commands:
+Please run the following command to install Python:
 
 ```
 sudo apt install python3-pip
-pip3 install numpy
 ```
 ### NOTE:  We assume that the user is using Linux and we use python3 for executing the code.
 
