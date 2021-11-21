@@ -1,3 +1,4 @@
+from collections import deque, namedtuple
 import numpy as np
 import gym
 import random
@@ -22,22 +23,22 @@ DEFAULT_DISCOUNT = 0.99
 EPSILON = 1
 LEARNINGRATENET = 0.0001  # QNET
 
+Transition = namedtuple('Transition',
+                        ('prev_obs', 'action', 'obs', 'reward','done'))
 
 # TODO coding exercise 3: implement experience replay
 class ReplayMemory(object):
     # ReplayMemory should store the last "size" experiences
     # and be able to return a randomly sampled batch of experiences
     def __init__(self, size):
-        pass #<- TODO: you need to modify this
+        self.memory = deque([],maxlen=size)
 
     # Store experience in memory
     def store_experience(self, prev_obs, action, observation, reward, done):
-        pass #<- TODO: you need to modify this
-
+        self.memory.append(Transition(prev_obs, action, observation, reward, done))
     # Randomly sample "batch_size" experiences from the memory and return them
     def sample_batch(self, batch_size):
-        pass #<- TODO: you need to modify this
-
+        return random.sample(self.memory, batch_size)
 
 # DEBUG=True
 DEBUG = False
@@ -199,9 +200,10 @@ class QNet_MLP(QNet):
 
 
 class QLearner(object):
-    def __init__(self, env, q_function, discount=DEFAULT_DISCOUNT, rm_size=RMSIZE):
+    def __init__(self, env, q_function, q_target_function,discount=DEFAULT_DISCOUNT, rm_size=RMSIZE):
         self.env = env
         self.Q = q_function
+        self.Qt = q_target_function
         self.rm = ReplayMemory(rm_size)  # replay memory stores (a subset of) experience across episode
         self.discount = discount
 
@@ -227,6 +229,9 @@ class QLearner(object):
         self.tot_stages += self.stage
         self.stage = 0           #reset the time step, or 'stage' in this episode
         self.episode += 1
+        # copy params to target network
+        self.Qt.load_state_dict(self.Q.state_dict())
+
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay # Decay epsilon
 
@@ -237,11 +242,36 @@ class QLearner(object):
         self.stage += 1
         self.Q.single_Q_update(prev_observation, action, observation, reward, done)
         self.last_obs = observation
-
+        self.rm.store_experience(prev_observation, action, observation, reward, done)
         # TODO coding exercise 3: Do a batch update using experience stored in the replay memory
-        # if self.tot_stages > 10 * self.batch_size:
-            # sample a batch of batch_size from the replay memory
-            # and update the network using this batch (batch_Q_update)
+        if self.tot_stages > 10 * self.batch_size:
+                
+                batch_exp  = self.rm.sample_batch(self.batch_size)
+                prev_obs = batch_exp[0].prev_obs
+                len_obs = np.shape(prev_obs)[0]
+                batch_prev_obs = np.reshape(prev_obs,(1,len_obs))
+
+                #print("Prev obs is" , batch_prev_obs)
+                batch_action = np.array(batch_exp[0].action)
+                #print("Action is",batch_action)
+
+                obs = batch_exp[0].obs
+                batch_obs = np.reshape(obs,(1,len_obs))
+
+                batch_reward = np.array(batch_exp[0].reward)
+                #print("Reward is",batch_reward)
+                batch_done = np.array(batch_exp[0].done)
+                #print(batch_done)
+                for i in range(1,len(batch_exp)):
+                    batch_prev_obs = np.concatenate((batch_prev_obs,np.reshape(batch_exp[i].prev_obs,(1,len_obs))),axis=0)
+                    batch_action = np.append(batch_action,batch_exp[i].action)
+                    batch_obs = np.concatenate((batch_obs,np.reshape(batch_exp[i].obs,(1,len_obs))),axis=0)
+                    batch_reward = np.append(batch_reward,batch_exp[i].reward)
+                    batch_done = np.append(batch_done,batch_exp[i].done)
+
+                #print("Prev obs is" , batch_prev_obs)    
+                self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done)
+               
 
 
     def select_action(self):
@@ -257,7 +287,7 @@ class QLearner(object):
         else:
             #obs = self.gym2qnet_observation(self.last_obs) #XXX
             obs = self.last_obs
-            action = self.Q.argmax_Q_value(obs)
+            action = self.Qt.argmax_Q_value(obs)
             if DEBUG:
                 print("select_action_greedy used")
 
