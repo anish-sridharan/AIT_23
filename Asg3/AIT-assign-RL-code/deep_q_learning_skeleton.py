@@ -101,7 +101,7 @@ class QNet(nn.Module):
 
         return q
 
-    def single_Q_update(self, prev_observation, action, observation, reward, done):
+    def single_Q_update(self, prev_observation, action, observation, reward, done, target_network):
         """ action and observation need to be in the format that QNet was constructed for.
             I.e., if observation is a discrete variable (with say N values=states), but QNet
             is working on one-hot vectors (of length N), then observation needs to be such a
@@ -115,7 +115,7 @@ class QNet(nn.Module):
         if done:
             future_val = 0 
         else:
-            future_val = self.max_Q_value(t_observation)        ##<<- this evaluates the QNet
+            future_val = target_network.max_Q_value(t_observation)        ##<<- this evaluates the QNet
         # We just evaluated the Qnet for the next-stage variables, but of course... the effect of the Qnet 
         # parameters on the *next-stage* value is ignored by Q-learning. 
         # (residual gradient algorithms do takes this into account, but 
@@ -145,10 +145,10 @@ class QNet(nn.Module):
         debug_utils.debug_q_update(prev_observation, action, observation, reward, done, predict, self.discount, future_val,
                                    target, td, new_q)
 
-    def batch_Q_update(self, obs, actions, next_obs, rewards, dones):
+    def batch_Q_update(self, obs, actions, next_obs, rewards, dones,target_network):
 
         batch_size = len(dones)
-        v_next_obs = self.max_Q_value(next_obs, batch_size)
+        v_next_obs = target_network.max_Q_value(next_obs, batch_size)
         not_dones = 1 - dones
         fut_values = self.discount * v_next_obs * not_dones
         targets = rewards + fut_values
@@ -240,7 +240,7 @@ class QLearner(object):
         self.cum_r += reward
         self.dis_r += reward * (self.discount ** self.stage)
         self.stage += 1
-        self.Q.single_Q_update(prev_observation, action, observation, reward, done)
+        self.Q.single_Q_update(prev_observation, action, observation, reward, done,self.Qt)
         self.last_obs = observation
         self.rm.store_experience(prev_observation, action, observation, reward, done)
         # TODO coding exercise 3: Do a batch update using experience stored in the replay memory
@@ -270,7 +270,7 @@ class QLearner(object):
                     batch_done = np.append(batch_done,batch_exp[i].done)
 
                 #print("Prev obs is" , batch_prev_obs)    
-                self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done)
+                self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done,self.Qt)
                
 
 
@@ -287,7 +287,7 @@ class QLearner(object):
         else:
             #obs = self.gym2qnet_observation(self.last_obs) #XXX
             obs = self.last_obs
-            action = self.Qt.argmax_Q_value(obs)
+            action = self.Q.argmax_Q_value(obs)
             if DEBUG:
                 print("select_action_greedy used")
 
