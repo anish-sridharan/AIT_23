@@ -1,7 +1,8 @@
-from collections import deque, namedtuple
+from collections import deque, namedtuple , defaultdict
 import numpy as np
 import gym
 import random
+from numpy.core.numeric import indices
 
 import torch
 import torch.nn as nn
@@ -24,7 +25,7 @@ EPSILON = 1
 LEARNINGRATENET = 0.0001  # QNET
 
 Transition = namedtuple('Transition',
-                        ('prev_obs', 'action', 'obs', 'reward','done'))
+                        field_names=['prev_obs', 'action', 'obs', 'reward','done'])
 
 # TODO coding exercise 3: implement experience replay
 class ReplayMemory(object):
@@ -38,7 +39,13 @@ class ReplayMemory(object):
         self.memory.append(Transition(prev_obs, action, observation, reward, done))
     # Randomly sample "batch_size" experiences from the memory and return them
     def sample_batch(self, batch_size):
-        return random.sample(self.memory, batch_size)
+        indices = np.random.choice(len(self.memory), batch_size,replace=False)
+        dicts_list = [self.memory[ids]._asdict() for ids in indices]
+        combined_dict = {key: [d.get(key) for d in dicts_list] for key in set().union(*dicts_list) }
+        
+        prev_obs, actions, observations, rewards, dones = combined_dict['prev_obs'], combined_dict['action'],combined_dict['obs'], combined_dict['reward'],combined_dict['done']  
+        
+        return np.array(prev_obs), np.array(actions), np.array(observations), np.array(rewards), np.array(dones)
 
 # DEBUG=True
 DEBUG = False
@@ -242,33 +249,14 @@ class QLearner(object):
         self.stage += 1
         self.Q.single_Q_update(prev_observation, action, observation, reward, done,self.Qt)
         self.last_obs = observation
+        
         self.rm.store_experience(prev_observation, action, observation, reward, done)
+        
+        
         # TODO coding exercise 3: Do a batch update using experience stored in the replay memory
         if self.tot_stages > 10 * self.batch_size:
+                batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done = self.rm.sample_batch(self.batch_size)
                 
-                batch_exp  = self.rm.sample_batch(self.batch_size)
-                prev_obs = batch_exp[0].prev_obs
-                len_obs = np.shape(prev_obs)[0]
-                batch_prev_obs = np.reshape(prev_obs,(1,len_obs))
-
-                #print("Prev obs is" , batch_prev_obs)
-                batch_action = np.array(batch_exp[0].action)
-                #print("Action is",batch_action)
-
-                obs = batch_exp[0].obs
-                batch_obs = np.reshape(obs,(1,len_obs))
-
-                batch_reward = np.array(batch_exp[0].reward)
-                #print("Reward is",batch_reward)
-                batch_done = np.array(batch_exp[0].done)
-                #print(batch_done)
-                for i in range(1,len(batch_exp)):
-                    batch_prev_obs = np.concatenate((batch_prev_obs,np.reshape(batch_exp[i].prev_obs,(1,len_obs))),axis=0)
-                    batch_action = np.append(batch_action,batch_exp[i].action)
-                    batch_obs = np.concatenate((batch_obs,np.reshape(batch_exp[i].obs,(1,len_obs))),axis=0)
-                    batch_reward = np.append(batch_reward,batch_exp[i].reward)
-                    batch_done = np.append(batch_done,batch_exp[i].done)
-
                 #print("Prev obs is" , batch_prev_obs)    
                 self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done,self.Qt)
                
