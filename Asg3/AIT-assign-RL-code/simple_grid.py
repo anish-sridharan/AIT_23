@@ -230,7 +230,8 @@ class DrunkenWalkEnv(discrete.DiscreteEnv):
         row, col = self.s // self.ncol, self.s % self.ncol
         desc = self.desc.tolist()
         desc = [[c.decode('utf-8') for c in line] for line in desc]
-        desc[row][col] = utils.colorize(desc[row][col], "red", highlight=True)
+        #desc[row][col] = utils.colorize(desc[row][col], "red", highlight=True)
+        desc[row][col] = "x"
         if self.lastaction is not None:
             outfile.write(" (last action was '{action}')\n".format( action=self.action_to_string(self.lastaction) ) )
         else:

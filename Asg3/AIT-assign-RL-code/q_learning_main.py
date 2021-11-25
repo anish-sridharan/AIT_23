@@ -21,7 +21,7 @@ def act_loop(env, agent, num_episodes):
 
             if printing:
                 print('---stage %d---' % t)
-                agent.report()
+                #agent.report()
                 print("state:", state)
 
             action = agent.select_action(state)
@@ -35,7 +35,8 @@ def act_loop(env, agent, num_episodes):
             if done:
                 print("Episode finished after {} timesteps".format(t+1))
                 env.render()
-                agent.report()
+                if episode > num_episodes - 4:
+                    agent.report()
                 break
 
     env.close()
