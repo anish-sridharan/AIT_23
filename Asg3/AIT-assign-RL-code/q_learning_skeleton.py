@@ -16,7 +16,8 @@ class QLearner():
     def __init__(self, num_states, num_actions, discount=DEFAULT_DISCOUNT, learning_rate=LEARNINGRATE): 
         self.name = "agent1"
         self.map_name = 'walkInThePark' if num_actions == 4 else 'theAlley' #Quick and dirty hack to toggle bw the two envs
-        self.q_table = np.zeros((num_states, num_actions))
+        #self.q_table = np.zeros((num_states, num_actions))
+        self.q_table = 100*np.ones((num_states, num_actions)) # Optimistic initialisation to encourage exploration
         self.discount = discount
         self.learning_rate = learning_rate
         self.possible_actions = num_actions
