@@ -15,6 +15,7 @@ class QLearner():
     """
     def __init__(self, num_states, num_actions, discount=DEFAULT_DISCOUNT, learning_rate=LEARNINGRATE): 
         self.name = "agent1"
+        self.map_name = 'walkInThePark' if num_actions == 4 else 'theAlley' #Quick and dirty hack to toggle bw the two envs
         self.q_table = np.zeros((num_states, num_actions))
         self.discount = discount
         self.learning_rate = learning_rate
@@ -62,33 +63,56 @@ class QLearner():
         """
         # Warning: you have to manually set the rows and columns to the correct number here
         # currently not working for theAlley
-        ncols = 8
-        nrows = 6
         
-        print("---")
-        print("Greedy policy goes through these states:")
-        state = 0
-        print("state is 0")
-        while state != self.possible_states-1:
-            action = np.argmax(self.q_table[state,:])
-            if action == 0:
-                print("GO LEFT")
-                if state % ncols != 0:
-                    state = state - 1
-            elif action == 1:
-                print("GO DOWN")
-                if state <= ncols*(nrows-1):
-                    state = state + ncols 
-            elif action == 2: 
-                print("GO RIGHT")
-                if state % ncols != (ncols-1):
-                    state = state + 1
-            elif action == 3:
-                print("GO UP")
-                if state > ncols:
-                    state = state - ncols
-            print("state is ", state)
-        print("---")
+        if(self.map_name == 'walkInThePark'):
+            ncols = 8
+            nrows = 6
+            print("---")
+            print("Greedy policy goes through these states:")
+            state = 0
+            print("state is 0")
+            while state != self.possible_states-1:
+                action = np.argmax(self.q_table[state,:])
+                if action == 0:
+                    print("GO LEFT")
+                    if state % ncols != 0:
+                        state = state - 1
+                elif action == 1:
+                    print("GO DOWN")
+                    if state <= ncols*(nrows-1):
+                        state = state + ncols 
+                elif action == 2: 
+                    print("GO RIGHT")
+                    if state % ncols != (ncols-1):
+                        state = state + 1
+                elif action == 3:
+                    print("GO UP")
+                    if state > ncols:
+                        state = state - ncols
+                print("state is ", state)
+            print("---")
+
+
+        if(self.map_name == 'theAlley'):
+            ncols = 13
+            nrows = 1
+            print("---")
+            print("Greedy policy goes through these states:")
+            state = 0
+            print("state is 0")
+            while state != self.possible_states-1:
+                action = np.argmax(self.q_table[state,:])
+                if action == 0:
+                    print("GO LEFT")
+                    if state % ncols != 0:
+                        state = state - 1
+                elif action == 2: 
+                    print("GO RIGHT")
+                    if state % ncols != (ncols-1):
+                        state = state + 1
+                print("state is ", state)
+            print("---")
+
 
 
 
