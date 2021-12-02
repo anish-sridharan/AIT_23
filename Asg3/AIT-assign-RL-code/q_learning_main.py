@@ -1,5 +1,5 @@
 import simple_grid
-from q_learning_skeleton import *
+from q_learning_skeleton_rmax import *
 import gym
 
 def act_loop(env, agent, num_episodes):
@@ -23,6 +23,8 @@ def act_loop(env, agent, num_episodes):
                 print('---stage %d---' % t)
                 #agent.report()
                 print("state:", state)
+            if episode >= num_episodes - 1 and t >= 499:
+                    agent.report()
 
             action = agent.select_action(state)
             new_state, reward, done, info = env.step(action)
@@ -34,17 +36,16 @@ def act_loop(env, agent, num_episodes):
             state = new_state
             if done:
                 print("Episode finished after {} timesteps".format(t+1))
+                print("Found Goal!!!!")
                 env.render()
-                if episode > num_episodes - 4:
-                    agent.report()
                 break
 
     env.close()
 
 
 if __name__ == "__main__":
-    env = simple_grid.DrunkenWalkEnv(map_name="walkInThePark")
-    # env = simple_grid.DrunkenWalkEnv(map_name="theAlley")
+    # env = simple_grid.DrunkenWalkEnv(map_name="walkInThePark")
+    env = simple_grid.DrunkenWalkEnv(map_name="theAlley")
     num_a = env.action_space.n
 
     if (type(env.observation_space)  == gym.spaces.discrete.Discrete):

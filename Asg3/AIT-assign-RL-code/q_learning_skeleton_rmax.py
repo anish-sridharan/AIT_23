@@ -11,6 +11,7 @@ MAX_EPISODE_LENGTH = 500
 DEFAULT_DISCOUNT = 0.9
 EPSILON = 0.05
 LEARNINGRATE = 0.1
+COUNTER = 1
 
 printing = True
 
@@ -20,12 +21,13 @@ class QLearner():
     """
     def __init__(self, num_states, num_actions, discount=DEFAULT_DISCOUNT, learning_rate=LEARNINGRATE): 
         self.name = "agent1"
-        self.q_table = np.zeros((num_states, num_actions))
+        self.q_table = np.zeros((num_states, num_actions)) + 10000
+        print(self.q_table)
         self.discount = discount
         self.learning_rate = learning_rate
         self.possible_actions = num_actions
         self.possible_states = num_states
-        self.explored_states = np.zeros(num_states)
+        self.explored_states = np.zeros((num_states, num_actions))
 
 
     def reset_episode(self):
@@ -39,25 +41,25 @@ class QLearner():
         """
         Update the Q-value based on the state, action, next state and reward.
         """
-        self.explored_states[state] += 1
+        self.explored_states[state, action] += 1
         old = self.q_table[state, action]
+        if (self.explored_states[state, action] >= COUNTER):
+            old = 0
+
         if not done:
             max_action_next_state = np.max(self.q_table[next_state,:])
+            if (max_action_next_state > 1000) :
+                max_action_next_state = 1
             self.q_table[state, action] = (1-self.learning_rate)*old + self.learning_rate*(reward+self.discount*max_action_next_state)
         else:
             self.q_table[state, action] = (1-self.learning_rate)*old + self.learning_rate*reward
-
-
 
     def select_action(self, state): 
         """
         Returns an action, selected based on the current state
         """
-        if random.uniform(0,1)<=EPSILON:
-            return random.randint(0, self.possible_actions-1)
-        else:
-            #print("Index of greedy action is ", np.argmax(self.q_table[state,:]))
-            return random.choice(np.argwhere(self.q_table[state, :] == np.max(self.q_table[state,:])).flatten())
+        #print("Index of greedy action is ", np.argmax(self.q_table[state,:]))
+        return random.choice(np.argwhere(self.q_table[state, :] == np.max(self.q_table[state,:])).flatten())
 
 
 
