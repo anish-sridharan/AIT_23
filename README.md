@@ -1,5 +1,3 @@
-# AIT_23
-
 ## Q-learning
 
 To run a normal experiment and/or calculate the Q* matrix make sure line 2 of q_learning_main.py is set to 
