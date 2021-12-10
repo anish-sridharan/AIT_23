@@ -12,26 +12,35 @@ DEFAULT_DISCOUNT = 0.9
 EPSILON = 0.05
 LEARNINGRATE = 0.1
 
-printing = True
+printing = False
 
 class QLearner():
     """
     Q-learning agent
     """
-    def __init__(self, num_states, num_actions, discount=DEFAULT_DISCOUNT, learning_rate=LEARNINGRATE): 
+    def __init__(self, num_states, num_actions, discount=DEFAULT_DISCOUNT, learning_rate=LEARNINGRATE, epsilon=EPSILON):
         self.name = "agent1"
-        self.q_table = np.zeros((num_states, num_actions))
+        self.q_table = 15*np.ones((num_states, num_actions))
         self.discount = discount
         self.learning_rate = learning_rate
         self.possible_actions = num_actions
         self.possible_states = num_states
-        self.explored_states = np.zeros(num_states)
+        self.epsilon = epsilon
+        self.found = False
 
 
-    def reset_episode(self):
+    def reset_episode(self, eps):
         """
         Here you can update some of the statistics that could be helpful to maintain
         """
+        policy = []
+        for s in range(self.possible_states):
+            policy.append(np.argmax(self.q_table[s, :]))
+        policy = np.array(policy)
+        if len(np.where(policy == 2)[0]) == 12 and not self.found:
+            self.found = True
+            print("Found optimal!", eps)
+        pass
         pass
 
 
@@ -39,7 +48,6 @@ class QLearner():
         """
         Update the Q-value based on the state, action, next state and reward.
         """
-        self.explored_states[state] += 1
         old = self.q_table[state, action]
         if not done:
             max_action_next_state = np.max(self.q_table[next_state,:])
@@ -53,7 +61,7 @@ class QLearner():
         """
         Returns an action, selected based on the current state
         """
-        if random.uniform(0,1)<=EPSILON:
+        if random.uniform(0,1)<=self.epsilon:
             return random.randint(0, self.possible_actions-1)
         else:
             #print("Index of greedy action is ", np.argmax(self.q_table[state,:]))
@@ -66,114 +74,86 @@ class QLearner():
         """
         Function to print useful information, printed during the main loop
         """
-        # Value iteration implementation
-        
-        # P(state, action, next_state)
-        P = np.zeros([13, 4, 13])
 
-        #Normal pavement
-        for i in [1,2,3,5,6,7,9,10,11]:
-            # Left
-            P[i, 0, i-1] = 0.8
-            P[i, 0, i] = 0.2
-            # Down
-            P[i, 1, i-1] = 0.1
-            P[i, 1, i] = 0.8
-            P[i, 1, i+1] = 0.1
-            # Right
-            P[i, 2, i] = 0.2
-            P[i, 2, i+1] = 0.8
-            # Up 
-            P[i, 3, i-1] = 0.1
-            P[i, 3, i] = 0.8
-            P[i, 3, i+1] = 0.1
-        
-        #Start state
-        P[0, 0, 0] = 1
-        P[0, 1, 0] = 0.9
-        P[0, 1, 1] = 0.1
-        P[0, 2, 0] = 0.2
-        P[0, 2, 1] = 0.8
-        P[0, 3, 0] = 0.9
-        P[0, 3, 1] = 0.1
-
-        #End state
-        P[12, 0, 12] = 1
-        P[12, 1, 12] = 1
-        P[12, 2, 12] = 1
-        P[12, 3, 12] = 1
-
-        #Pothole state (4, 8)
-        for i in [4, 8]:
-            # Left
-            P[i, 0, i-1] = 0.8
-            P[i, 0, 0] = 0.2
-            # Down
-            P[i, 1, i] = 0.8
-            P[i, 1, 0] = 0.2
-            # Right
-            P[i, 2, i+1] = 0.8
-            P[i, 2, 0] = 0.2
-            # Up
-            P[i, 3, i] = 0.8
-            P[i, 3, 0] = 0.2
-
-        
-        reward = np.zeros((13, 4, 13))
-        reward[11, 1, 12] = 10
-        reward[11, 2, 12] = 10
-        reward[11, 3, 12] = 10
-
-        for i in [4, 8]:
-            for j in range(4):
-                reward[i, j, 0] = BROKEN_LEG_PENALTY
-        
-        ## Value iteration: Q*_n+1(s, a) : = sum_{s'\in S}p(next state|s, a) * (R(state, action, next_state)  + gamma * max(Q*_n(next_state, next action)))
-        optimal_q = np.zeros([13, 4]) 
-        for counter in range(1000):
-            for state in range(13):
-                for action in range(4):
-                    intermediate = 0
-                    for next_state in range(13):
-                        intermediate += P[state, action, next_state] * (reward[state, action, next_state] + self.discount * np.max(optimal_q[next_state, :]))
-                    optimal_q[state, action] = intermediate
-        print("Optimal" ,optimal_q)
-                
-             
+        policy = []
+        for s in range(self.possible_states):
+            policy.append(np.argmax(self.q_table[s, :]))
+        print(policy)
 
         if printing:
-            ncols = 13
-            nrows = 1
+            # Value iteration implementation
 
-            print("---")
-            print("Greedy policy goes through these states:")
-            state = 0
-            counter = 0
-            print("state is 0")
-            while state != self.possible_states-1 and counter < 20:
-                action = np.argmax(self.q_table[state,:])
-                if action == 0:
-                    print("GO LEFT")
-                    if state % ncols != 0:
-                        state = state - 1
-                elif action == 1:
-                    print("GO DOWN")
-                    if state <= ncols*(nrows-1):
-                        state = state + ncols
-                elif action == 2:
-                    print("GO RIGHT")
-                    if state % ncols != (ncols-1):
-                        state = state + 1
-                elif action == 3:
-                    print("GO UP")
-                    if state > ncols:
-                        state = state - ncols
-                
-                print("state is ", state) 
-                counter += 1
-            print("---")
+            # P(state, action, next_state)
+            P = np.zeros([13, 4, 13])
 
-            print(self.q_table)
+            # Normal pavement
+            for i in [1, 2, 3, 5, 6, 7, 9, 10, 11]:
+                # Left
+                P[i, 0, i - 1] = 0.8
+                P[i, 0, i] = 0.2
+                # Down
+                P[i, 1, i - 1] = 0.1
+                P[i, 1, i] = 0.8
+                P[i, 1, i + 1] = 0.1
+                # Right
+                P[i, 2, i] = 0.2
+                P[i, 2, i + 1] = 0.8
+                # Up
+                P[i, 3, i - 1] = 0.1
+                P[i, 3, i] = 0.8
+                P[i, 3, i + 1] = 0.1
+
+            # Start state
+            P[0, 0, 0] = 1
+            P[0, 1, 0] = 0.9
+            P[0, 1, 1] = 0.1
+            P[0, 2, 0] = 0.2
+            P[0, 2, 1] = 0.8
+            P[0, 3, 0] = 0.9
+            P[0, 3, 1] = 0.1
+
+            # End state
+            P[12, 0, 12] = 1
+            P[12, 1, 12] = 1
+            P[12, 2, 12] = 1
+            P[12, 3, 12] = 1
+
+            # Pothole state (4, 8)
+            for i in [4, 8]:
+                # Left
+                P[i, 0, i - 1] = 0.8
+                P[i, 0, 0] = 0.2
+                # Down
+                P[i, 1, i] = 0.8
+                P[i, 1, 0] = 0.2
+                # Right
+                P[i, 2, i + 1] = 0.8
+                P[i, 2, 0] = 0.2
+                # Up
+                P[i, 3, i] = 0.8
+                P[i, 3, 0] = 0.2
+
+            reward = np.zeros((13, 4, 13))
+            reward[11, 1, 12] = 10
+            reward[11, 2, 12] = 10
+            reward[11, 3, 12] = 10
+
+            for i in [4, 8]:
+                for j in range(4):
+                    reward[i, j, 0] = BROKEN_LEG_PENALTY
+
+            ## Value iteration: Q*_n+1(s, a) : = sum_{s'\in S}p(next state|s, a) * (R(state, action, next_state)  + gamma * max(Q*_n(next_state, next action)))
+            optimal_q = np.zeros([13, 4])
+            for counter in range(1000):
+                for state in range(13):
+                    for action in range(4):
+                        intermediate = 0
+                        for next_state in range(13):
+                            intermediate += P[state, action, next_state] * (
+                                        reward[state, action, next_state] + self.discount * np.max(
+                                    optimal_q[next_state, :]))
+                        optimal_q[state, action] = intermediate
+            print("Optimal", optimal_q)
     
 
 
@@ -184,3 +164,4 @@ class QLearner():
 
 
         
+

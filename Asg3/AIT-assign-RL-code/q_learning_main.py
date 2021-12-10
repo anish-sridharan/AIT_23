@@ -1,30 +1,28 @@
 import simple_grid
-from q_learning_skeleton_rmax import *
+from q_learning_skeleton import *
 import gym
 
 def act_loop(env, agent, num_episodes):
     for episode in range(num_episodes):
         state = env.reset()
-        agent.reset_episode()
+        agent.reset_episode(episode)
 
-        print('---episode %d---' % episode)
+        # print('---episode %d---' % episode)
         renderit = False
-        if episode % 10 == 0:
-            renderit = True
+        # if episode % 10 == 0:
+        #     renderit = True
 
         for t in range(MAX_EPISODE_LENGTH):
             if renderit:
                 env.render()
-            printing=False
-            if t % 500 == 499:
-                printing = True
+            printing = False
+            # if t % 500 == 499:
+            #     printing = True
 
             if printing:
                 print('---stage %d---' % t)
                 #agent.report()
                 print("state:", state)
-            if episode >= num_episodes - 1 and t >= 499:
-                    agent.report()
 
             action = agent.select_action(state)
             new_state, reward, done, info = env.step(action)
@@ -34,10 +32,12 @@ def act_loop(env, agent, num_episodes):
 
             agent.process_experience(state, action, new_state, reward, done)
             state = new_state
+
+            if episode == num_episodes - 1 and (t == MAX_EPISODE_LENGTH -1 or done):
+                agent.report()
             if done:
-                print("Episode finished after {} timesteps".format(t+1))
-                print("Found Goal!!!!")
-                env.render()
+                # print("Episode finished after {} timesteps".format(t+1))
+                # env.render()
                 break
 
     env.close()
@@ -53,9 +53,12 @@ if __name__ == "__main__":
     else:
         raise("Qtable only works for discrete observations")
 
-
     discount = DEFAULT_DISCOUNT
-    ql = QLearner(num_o, num_a, discount) #<- QTable
-    act_loop(env, ql, NUM_EPISODES)
+    # ql = QLearner(num_o, num_a, discount) #<- QTable
+
+    for i in range(10):
+        ql = QLearner(num_o, num_a, discount)  # <- QTable
+        act_loop(env, ql, NUM_EPISODES)
+    print("------------------")
 
 
