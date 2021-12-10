@@ -125,7 +125,7 @@ class QLearner():
 
         ## FINDING OF Q-star, (independent of exploration strategy)
 
-        # First we initialize all the transition probabilities
+        # # First we initialize all the transition probabilities
         P = initialize_transition_table()
 
         # Initialize the reward function
@@ -139,14 +139,31 @@ class QLearner():
                 reward[i, j, 0] = BROKEN_LEG_PENALTY
 
         ## Value iteration: Q*_n+1(s, a) : = sum_{s'\in S}p(next state|s, a) * (R(state, action, next_state)  + gamma * max(Q*_n(next_state, next action)))
+
+        # Initialize optimal q-table and intermediate q-table
         optimal_q = np.zeros([13, 4])
-        for counter in range(1000):
+        int_q_table = {}
+        for state in range(13):
+            int_q_table[state] = {}
+            for action in range(4):
+                int_q_table[state][action] = 1000
+        # Initialize counter that keeps track of the amount of q-table entries that have not changed
+        identical_value_counter = 0
+        while identical_value_counter != 13*4:
+            # New loop so we reset the value to zero
+            identical_value_counter = 0
             for state in range(13):
                 for action in range(4):
                     intermediate = 0
                     for next_state in range(13):
                         intermediate += P[state, action, next_state] * (
                                 reward[state, action, next_state] + self.discount_factor * np.max(optimal_q[next_state, :]))
+                    if intermediate == int_q_table[state][action]:
+                        # increment counter whenever value has not changed last
+                        identical_value_counter += 1
+
+                    # Set q-table entries
+                    int_q_table[state][action] = intermediate
                     optimal_q[state, action] = intermediate
         print("Optimal Q*-table", optimal_q)
 
