@@ -36,7 +36,8 @@ def act_loop(env, agent, num_episodes):
                 print("Episode finished after {} timesteps".format(t+1))
                 env.render()
                 if episode > num_episodes - 4:
-                    agent.report()
+                    #agent.report()
+                    pass
                 break
 
     env.close()
@@ -55,5 +56,7 @@ if __name__ == "__main__":
     discount = DEFAULT_DISCOUNT
     ql = QLearner(num_o, num_a, discount) #<- QTable
     act_loop(env, ql, NUM_EPISODES)
+    print(ql.q_table)
+    print("It reached the goal ", ql.goal_counter, " times")
 
 

@@ -247,7 +247,7 @@ class QLearner(object):
         self.cum_r += reward
         self.dis_r += reward * (self.discount ** self.stage)
         self.stage += 1
-        self.Q.single_Q_update(prev_observation, action, observation, reward, done,self.Qt)
+        # self.Q.single_Q_update(prev_observation, action, observation, reward, done,self.Q)
         self.last_obs = observation
         
         self.rm.store_experience(prev_observation, action, observation, reward, done)
@@ -258,6 +258,7 @@ class QLearner(object):
                 batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done = self.rm.sample_batch(self.batch_size)
                 
                 #print("Prev obs is" , batch_prev_obs)    
+                #self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done,self.Q)
                 self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done,self.Qt)
                
 

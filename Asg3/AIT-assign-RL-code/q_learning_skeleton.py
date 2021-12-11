@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 NUM_EPISODES = 1000
-MAX_EPISODE_LENGTH = 500
+MAX_EPISODE_LENGTH = 5000
 
 
 DEFAULT_DISCOUNT = 0.9
@@ -15,14 +15,15 @@ class QLearner():
     """
     def __init__(self, num_states, num_actions, discount=DEFAULT_DISCOUNT, learning_rate=LEARNINGRATE): 
         self.name = "agent1"
-        self.map_name = 'walkInThePark' if num_actions == 4 else 'theAlley' #Quick and dirty hack to toggle bw the two envs
+        self.map_name = 'walkInThePark' if num_states == 48 else 'theAlley' #Quick and dirty hack to toggle bw the two envs
         #self.q_table = np.zeros((num_states, num_actions))
-        self.q_table = 100*np.ones((num_states, num_actions)) # Optimistic initialisation to encourage exploration
+        self.q_table = 1000*np.ones((num_states, num_actions)) # Optimistic initialisation to encourage exploration
         self.discount = discount
         self.learning_rate = learning_rate
         self.possible_actions = num_actions
         self.possible_states = num_states
         self.explored_states = np.zeros(num_states)
+        self.goal_counter = 0
 
 
     def reset_episode(self):
@@ -43,7 +44,8 @@ class QLearner():
             self.q_table[state, action] = (1-self.learning_rate)*old + self.learning_rate*(reward+self.discount*max_action_next_state)
         else:
             self.q_table[state, action] = (1-self.learning_rate)*old + self.learning_rate*reward
-
+        if(next_state == self.possible_states-1):
+            self.goal_counter = self.goal_counter + 1 
 
 
     def select_action(self, state): 
@@ -105,7 +107,7 @@ class QLearner():
                 action = np.argmax(self.q_table[state,:])
                 if action == 0:
                     print("GO LEFT")
-                    if state % ncols != 0:
+                    if state % (ncols-1) != 0:
                         state = state - 1
                 elif action == 2: 
                     print("GO RIGHT")
