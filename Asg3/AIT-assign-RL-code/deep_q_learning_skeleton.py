@@ -207,13 +207,13 @@ class QNet_MLP(QNet):
 
 
 class QLearner(object):
-    def __init__(self, env, q_function, q_target_function,discount=DEFAULT_DISCOUNT, rm_size=RMSIZE):
+    def __init__(self, env, q_function, q_target_function,ques_no,discount=DEFAULT_DISCOUNT, rm_size=RMSIZE):
         self.env = env
         self.Q = q_function
         self.Qt = q_target_function
         self.rm = ReplayMemory(rm_size)  # replay memory stores (a subset of) experience across episode
         self.discount = discount
-
+        self.ques_no = ques_no
         self.epsilon = EPSILON
         self.epsilon_min = .01
         self.epsilon_decay = .98
@@ -237,7 +237,8 @@ class QLearner(object):
         self.stage = 0           #reset the time step, or 'stage' in this episode
         self.episode += 1
         # copy params to target network
-        self.Qt.load_state_dict(self.Q.state_dict())
+        if self.ques_no == 11:
+            self.Qt.load_state_dict(self.Q.state_dict())
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay # Decay epsilon
@@ -247,18 +248,20 @@ class QLearner(object):
         self.cum_r += reward
         self.dis_r += reward * (self.discount ** self.stage)
         self.stage += 1
-        self.Q.single_Q_update(prev_observation, action, observation, reward, done,self.Qt)
+        target_net = self.Qt if self.ques_no == 11 else self.Q
+        self.Q.single_Q_update(prev_observation, action, observation, reward, done,target_net)
         self.last_obs = observation
         
         self.rm.store_experience(prev_observation, action, observation, reward, done)
         
         
-        # TODO coding exercise 3: Do a batch update using experience stored in the replay memory
-        if self.tot_stages > 10 * self.batch_size:
-                batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done = self.rm.sample_batch(self.batch_size)
-                
-                #print("Prev obs is" , batch_prev_obs)    
-                self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done,self.Qt)
+        # coding exercise 3: Do a batch update using experience stored in the replay memory
+        if(self.ques_no == 10 or self.ques_no == 11):
+            if self.tot_stages > 10 * self.batch_size:
+                    batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done = self.rm.sample_batch(self.batch_size)
+                    
+                    #print("Prev obs is" , batch_prev_obs)    
+                    self.Q.batch_Q_update(batch_prev_obs,batch_action,batch_obs,batch_reward, batch_done,target_net)
                
 
 

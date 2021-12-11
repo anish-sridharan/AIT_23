@@ -67,11 +67,10 @@ if __name__ == "__main__":
 
     discount = DEFAULT_DISCOUNT
 
-    ql = QLearner(env, qn, discount) #<- QNet
-
-    # TODO: Coding exercise 4: target network
+    ques_no = 9 # Set to 9, 10 or 11
+    # Coding exercise 4: target network
     target_qn = QNet_MLP(num_a, shape_o)
     target_qn.load_state_dict(qn.state_dict())
-    ql = QLearner(env, qn, target_qn, discount)  # <- QNet
+    ql = QLearner(env, qn, target_qn, ques_no, discount)  # <- QNet
 
     act_loop(env, ql, NUM_EPISODES)
