@@ -249,7 +249,7 @@ class QLearner(object):
         self.dis_r += reward * (self.discount ** self.stage)
         self.stage += 1
         target_net = self.Qt if self.ques_no == 11 else self.Q
-        self.Q.single_Q_update(prev_observation, action, observation, reward, done,target_net)
+        #self.Q.single_Q_update(prev_observation, action, observation, reward, done,target_net)
         self.last_obs = observation
         
         self.rm.store_experience(prev_observation, action, observation, reward, done)
